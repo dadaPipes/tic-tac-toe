@@ -1,0 +1,15 @@
+.board-container {
+
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  height: 800px;
+  list-style: none;
+}
+
+.board__field {
+  border: solid black 3px;
+}

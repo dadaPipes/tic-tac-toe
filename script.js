@@ -1,19 +1,6 @@
-class Game {
-  constructor() {
-    this.board = new Board();
-    this.player1 = new Player("Human", "Cross");
-    this.player2 = new Player("Computer", "Circle");
-    this.gameFlow = new GameFlow(this.player1, this.player2, this.board);
-  }
-}
-
 class Board {
   constructor() {
     this.board = Array(9).fill(null);
-  }
-
-  printBoard() {
-    console.log("Board: ", this.board);
   }
 }
 
@@ -32,6 +19,7 @@ class Player {
 
 class GameFlow {
   constructor(player1, player2, board) {
+    this.board = new Board();
     this.currentPlayer = player1; // Start with the first player
     this.player1 = player1;
     this.player2 = player2;
@@ -77,9 +65,35 @@ class GameFlow {
   }
 
   getUserInput() {
-    return parseInt(prompt(`${this.currentPlayer.name}, enter the index where you want to place your marker:`));
+    return this.currentPlayer.marker;
   }
 }
 
-const game = new Game();
-game.gameFlow.playRound();
+class DisplayGame {
+  constructor(game) {
+    this.game = game;
+  }
+
+  displayBoard() {
+    let boardContainer = document.querySelector(".board-container");
+    const board = document.createElement("ul");
+    board.classList.add("board");
+
+    for (let i = 0; i < 9; i++) {
+      const field = document.createElement("li");
+      field.classList.add("board__field");
+
+      board.appendChild(field);
+    }
+
+    boardContainer.appendChild(board);
+  }
+}
+
+const board = new Board();
+const player1 = new Player("Human", "Cross");
+const player2 = new Player("Computer", "Circle");
+const game = new GameFlow(player1 , player2, board);
+console.log(game);
+const displayGame = new DisplayGame(game);
+displayGame.displayBoard();
