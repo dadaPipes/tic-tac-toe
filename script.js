@@ -1,6 +1,30 @@
 class Board {
   constructor() {
-    this.board = Array(9).fill(null);
+    this.fields = Array(9).fill(null);
+  }
+}
+
+class DisplayController {
+  constructor(board, gameFlow) {
+    this.board = board;
+    this.gameFlow = gameFlow;
+    this.createBoard();
+  }
+
+  createBoard() {
+    const boardDiv = document.createElement("div");
+    boardDiv.classList.add("board");
+
+    this.board.fields.forEach((element, index) => {
+      const button = document.createElement("button");
+      button.classList.add("board__field");
+      button.type = "button";
+      button.addEventListener("click", () => {
+        this.gameFlow.placeMarker(index, button);
+      });
+      boardDiv.appendChild(button);
+    });
+    document.body.appendChild(boardDiv);
   }
 }
 
@@ -9,33 +33,32 @@ class Player {
     this.name = name;
     this.marker = marker;
   }
-
-  placeMarker(board, index) {
-    if (board[index] === null) {
-      board[index] = this.marker;
-    }
-  }
 }
 
 class GameFlow {
   constructor(player1, player2, board) {
-    this.board = new Board();
     this.currentPlayer = player1; // Start with the first player
     this.player1 = player1;
     this.player2 = player2;
     this.board = board;
   }
 
-  playRound() {
-    while (this.findWinner() === null) {
-      this.board.printBoard();
-      const index = this.getUserInput();
-      this.currentPlayer.placeMarker(this.board.board, index);
-      if (this.findWinner() === null) {
-        this.switchTurn()
-      }
+  placeMarker(index, button) {
+    if (this.board.fields[index] === null) {
+      this.board.fields[index] = this.currentPlayer.marker;
+      button.textContent = this.currentPlayer.marker;
+      this.checkGameStatus(index);
     }
-    console.log(`${this.findWinner().name} wins!`);
+  }
+
+  checkGameStatus() {
+    if (this.findWinner()) {
+      console.log(this.currentPlayer.name + " wins!");
+    } else if (this.isBoardFull()) {
+      console.log("It's a draw!");
+    } else {
+      this.switchTurn();
+    }
   }
 
   findWinner() {
@@ -45,12 +68,11 @@ class GameFlow {
       [0, 4, 8], [2, 4, 6]             // Diagonals
     ];
 
-    for (const line of linesToCheck) {
-      const [a, b, c] = line;
+    for (let line of linesToCheck) {
       if (
-        this.board.board[a] !== null &&
-        this.board.board[a] === this.board.board[b] &&
-        this.board.board[b] === this.board.board[c]
+        this.board.fields[line[0]] !== null &&
+        this.board.fields[line[0]] === this.board.fields[line[1]] &&
+        this.board.fields[line[1]] === this.board.fields[line[2]]
       ) {
         return this.currentPlayer;
       }
@@ -60,40 +82,25 @@ class GameFlow {
     return null;
   }
 
+  isBoardFull() {
+    return this.board.fields.every(field => field !== null);
+  }
+
   switchTurn() {
     this.currentPlayer = this.currentPlayer === this.player1 ? this.player2 : this.player1;
   }
-
-  getUserInput() {
-    return this.currentPlayer.marker;
-  }
 }
 
-class DisplayGame {
-  constructor(game) {
-    this.game = game;
-  }
+(function() {
+  const board = new Board();
+  console.log(board);
 
-  displayBoard() {
-    let boardContainer = document.querySelector(".board-container");
-    const board = document.createElement("ul");
-    board.classList.add("board");
+  const player1 = new Player("Human", "X");
+  console.log(player1);
 
-    for (let i = 0; i < 9; i++) {
-      const field = document.createElement("li");
-      field.classList.add("board__field");
+  const player2 = new Player("Computer", "O");
+  console.log(player2);
 
-      board.appendChild(field);
-    }
-
-    boardContainer.appendChild(board);
-  }
-}
-
-const board = new Board();
-const player1 = new Player("Human", "Cross");
-const player2 = new Player("Computer", "Circle");
-const game = new GameFlow(player1 , player2, board);
-console.log(game);
-const displayGame = new DisplayGame(game);
-displayGame.displayBoard();
+  const gameFlow = new GameFlow(player1, player2, board);
+  const displayController = new DisplayController(board, gameFlow);
+})();
